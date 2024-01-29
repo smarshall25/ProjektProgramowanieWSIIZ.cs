@@ -8,7 +8,7 @@ namespace ProjektProgramowanie
 {
     public class PojazdElektryczny : Pojazd
     {
-    
+ 
         public int RokProdukcji { get; set; }
         public int PojemnoscBaterii { get; set; }
     }

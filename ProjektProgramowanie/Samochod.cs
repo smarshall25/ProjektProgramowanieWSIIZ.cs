@@ -8,8 +8,9 @@ namespace ProjektProgramowanie
 {
     public class Samochod : PojazdMechaniczny
     {
+        
         public int LiczbaDrzwi { get; set; }
-        public int RokProdukcji { get; set; }
+        
     }
 }
     

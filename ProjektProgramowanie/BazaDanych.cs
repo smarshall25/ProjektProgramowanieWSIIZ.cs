@@ -3,13 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 public class BazaDanych
 {
+    
     private const string sciezkaDoPlikuSamochodow = "C:\\Users\\sposs\\source\\repos\\ProjektProgramowanie\\ProjektProgramowanie\\samochody.txt";
     private const string sciezkaDoPlikuMotocykli = "C:\\Users\\sposs\\source\\repos\\ProjektProgramowanie\\ProjektProgramowanie\\motocykle.txt";
     private const string sciezkaDoPlikuElektrycznych = "C:\\Users\\sposs\\source\\repos\\ProjektProgramowanie\\ProjektProgramowanie\\elektryczne.txt";
 
+    
     public List<Pojazd> WczytajDane()
     {
         List<Pojazd> pojazdy = new List<Pojazd>();
@@ -21,6 +24,7 @@ public class BazaDanych
         return pojazdy;
     }
 
+    
     public void ZapiszPojazdy(List<Pojazd> pojazdy)
     {
         List<Pojazd> samochody = pojazdy.Where(p => p is Samochod).ToList();
@@ -31,8 +35,8 @@ public class BazaDanych
         ZapiszPojazdyDoPliku(motocykle, sciezkaDoPlikuMotocykli);
         ZapiszPojazdyDoPliku(pojazdyElektryczne, sciezkaDoPlikuElektrycznych);
     }
-
-    private List<Pojazd> WczytajPojazdyZPliku(string sciezkaDoPliku, TypPojazdu typPojazdu)
+   
+   private List<Pojazd> WczytajPojazdyZPliku(string sciezkaDoPliku, TypPojazdu typPojazdu)
     {
         List<Pojazd> pojazdy = new List<Pojazd>();
 
@@ -53,10 +57,10 @@ public class BazaDanych
 
                         Pojazd pojazd = null;
 
-                        if (typPojazdu == TypPojazdu.Samochod && dane.Length == 5)
+                        if (typPojazdu == TypPojazdu.Samochod && dane.Length == 6)
                         {
-                            int rokProdukcji, liczbaDrzwi;
-                            if (int.TryParse(dane[3], out rokProdukcji) && int.TryParse(dane[4], out liczbaDrzwi))
+                            int rokProdukcji, liczbaDrzwi, PojemnoscSilnika;
+                            if (int.TryParse(dane[3], out rokProdukcji) && int.TryParse(dane[4], out liczbaDrzwi) && int.TryParse(dane[5], out PojemnoscSilnika))
                             {
                                 pojazd = new Samochod
                                 {
@@ -64,21 +68,24 @@ public class BazaDanych
                                     Marka = marka,
                                     Model = model,
                                     RokProdukcji = rokProdukcji,
-                                    LiczbaDrzwi = liczbaDrzwi
+                                    LiczbaDrzwi = liczbaDrzwi,
+                                    PojemnoscSilnika = PojemnoscSilnika
+
                                 };
                             }
                         }
-                        else if (typPojazdu == TypPojazdu.Motocykl && dane.Length == 4)
+                        else if (typPojazdu == TypPojazdu.Motocykl && dane.Length == 5)
                         {
-                            int rokProdukcji;
-                            if (int.TryParse(dane[3], out rokProdukcji))
+                            int rokProdukcji, PojemnoscSilnika;
+                            if (int.TryParse(dane[3], out rokProdukcji) && int.TryParse(dane[4], out PojemnoscSilnika))
                             {
                                 pojazd = new Motocykl
                                 {
                                     ID = id,
                                     Marka = marka,
                                     Model = model,
-                                    RokProdukcji = rokProdukcji
+                                    RokProdukcji = rokProdukcji,
+                                    PojemnoscSilnika = PojemnoscSilnika
                                 };
                             }
                         }
@@ -109,7 +116,7 @@ public class BazaDanych
 
         return pojazdy;
     }
-
+    
     private void ZapiszPojazdyDoPliku(List<Pojazd> pojazdy, string sciezkaDoPliku)
     {
         List<string> liniePojazdow = new List<string>();
@@ -120,11 +127,11 @@ public class BazaDanych
 
             if (pojazd is Samochod samochod)
             {
-                linia += $",{samochod.RokProdukcji},{samochod.LiczbaDrzwi}";
+                linia += $",{samochod.RokProdukcji},{samochod.LiczbaDrzwi},{samochod.PojemnoscSilnika}";
             }
             else if (pojazd is Motocykl motocykl)
             {
-                linia += $",{motocykl.RokProdukcji},{motocykl.Typ}";
+                linia += $",{motocykl.RokProdukcji},{motocykl.Typ},{motocykl.PojemnoscSilnika}";
             }
             else if (pojazd is PojazdElektryczny pojazdElektryczny)
             {
@@ -136,7 +143,7 @@ public class BazaDanych
 
         File.WriteAllLines(sciezkaDoPliku, liniePojazdow);
     }
-
+   
     public void DodajSamochod(List<Pojazd> pojazdy)
     {
         Console.WriteLine("Dodawanie nowego samochodu:");
@@ -170,10 +177,24 @@ public class BazaDanych
             return;
         }
 
+        Console.Write("Podaj pojemnosc silnika: ");
+        if (int.TryParse(Console.ReadLine(), out int PojemnoscSilnika))
+        {
+            samochod.PojemnoscSilnika = PojemnoscSilnika;
+        }
+        else
+        {
+            Console.WriteLine("Nieprawidłowa pojemnosc. Samochód nie został dodany.");
+            return;
+        }
+
+       
+
         samochod.ID = GenerujNoweID(pojazdy);
         pojazdy.Add(samochod);
         Console.WriteLine("Samochód został dodany.");
     }
+
 
     public void DodajMotocykl(List<Pojazd> pojazdy)
     {
@@ -197,6 +218,17 @@ public class BazaDanych
             return;
         }
 
+        Console.Write("Podaj pojemnosc silnika: ");
+        if (int.TryParse(Console.ReadLine(), out int PojemnoscSilnika))
+        {
+            motocykl.PojemnoscSilnika = PojemnoscSilnika;
+        }
+        else
+        {
+            Console.WriteLine("Nieprawidłowa pojemnosc silnika. Motocykl nie został dodany.");
+            return;
+        }
+
         Console.Write("Podaj typ motocykla: ");
         motocykl.Typ = Console.ReadLine();
 
@@ -204,7 +236,7 @@ public class BazaDanych
         pojazdy.Add(motocykl);
         Console.WriteLine("Motocykl został dodany.");
     }
-
+    
     public void DodajPojazdElektryczny(List<Pojazd> pojazdy)
     {
         Console.WriteLine("Dodawanie nowego pojazdu elektrycznego:");
@@ -253,12 +285,15 @@ public class BazaDanych
             {
                 Console.WriteLine($"   - Rok produkcji: {samochod.RokProdukcji}");
                 Console.WriteLine($"   - Liczba drzwi: {samochod.LiczbaDrzwi}");
+                Console.WriteLine($"   - Pojemnosc silnika: {samochod.PojemnoscSilnika}cm3");
+                
             }
             else if (pojazd is Motocykl motocykl)
             {
                 
                 Console.WriteLine($"   - Rok produkcji: {motocykl.RokProdukcji}");
                 Console.WriteLine($"   - Typ motocykla: {motocykl.Typ}");
+                Console.WriteLine($"   - Pojemnosc silnika: {motocykl.PojemnoscSilnika}cm3");
             }
             else if (pojazd is PojazdElektryczny pojazdElektryczny)
             {
@@ -268,6 +303,26 @@ public class BazaDanych
             }
         }
     }
+
+    public void UsunPojazd(int idPojazdu ,List<Pojazd> pojazdy)
+    {
+        var pojazdDoUsuniecia = pojazdy.FirstOrDefault(p => p.ID == idPojazdu);
+        if (pojazdDoUsuniecia != null)
+        {
+            pojazdy.Remove(pojazdDoUsuniecia);
+        }
+    }
+
+    public void AktualizujPojazd(Pojazd zaktualizowanyPojazd, List<Pojazd> pojazdy)
+    {
+        var staryPojazd = pojazdy.FirstOrDefault(p => p.ID == zaktualizowanyPojazd.ID);
+        if (staryPojazd != null)
+        {
+            pojazdy.Remove(staryPojazd);
+            pojazdy.Add(zaktualizowanyPojazd);
+        }
+    }
+
 
     private int GenerujNoweID(List<Pojazd> pojazdy)
     {
